@@ -1,0 +1,140 @@
+﻿@model IEnumerable<InventoryPro.Models.Product>
+@{
+    ViewData["Title"] = "Inventory Valuation";
+    decimal totalValue = ViewBag.TotalValue ?? 0m;
+    int totalQty = ViewBag.TotalQty ?? 0;
+    int lowStockCount = ViewBag.LowStockCount ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-currency-dollar me-2 text-success"></i>
+            Inventory Valuation Report
+        </h2>
+        <p class="text-muted mb-0">
+            Total stock value across all products
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportValuationPdf" class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+        </a>
+        <a asp-action="ExportValuationCsv" class="btn btn-success">
+            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export CSV
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="bi bi-printer me-2"></i>Print
+        </button>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card"
+             style="background:linear-gradient(135deg,#28a745,#1e7e34);">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-label">Total Inventory Value</div>
+            <div class="stat-value">R @totalValue.ToString("N2")</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card"
+             style="background:linear-gradient(135deg,#1a73e8,#0d47a1);">
+            <div class="stat-icon"><i class="bi bi-archive"></i></div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">@Model.Count()</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card"
+             style="background:linear-gradient(135deg,#dc3545,#a71d2a);">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-label">Low Stock Items</div>
+            <div class="stat-value">@lowStockCount</div>
+        </div>
+    </div>
+</div>
+
+<!-- Valuation Table -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Supplier</th>
+                        <th class="text-center">Qty In Stock</th>
+                        <th class="text-end">Unit Price</th>
+                        <th class="text-end">Stock Value</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr class="@(product.IsLowStock ? "table-danger" : "")">
+                            <td>
+                                <span class="badge bg-secondary">
+                                    @product.ProductID
+                                </span>
+                            </td>
+                            <td>
+                                <strong>@product.ProductName</strong>
+                                @if (!string.IsNullOrEmpty(product.Description))
+                                {
+                                    <br />
+                                    <small class="text-muted">
+                                        @product.Description
+                                    </small>
+                                }
+                            </td>
+                            <td><small>@(product.Supplier ?? "—")</small></td>
+                            <td class="text-center fw-bold
+                                    @(product.IsLowStock ? "text-danger" : "text-success")">
+                                @product.QuantityInStock
+                            </td>
+                            <td class="text-end">
+                                R @product.UnitPrice.ToString("N2")
+                            </td>
+                            <td class="text-end fw-bold text-success">
+                                R @product.StockValue.ToString("N2")
+                            </td>
+                            <td class="text-center">
+                                @if (product.IsLowStock)
+                                {
+                                    <span class="badge bg-danger rounded-pill">
+                                        <i class="bi bi-exclamation-triangle me-1">
+                                        </i>Low Stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success rounded-pill">
+                                        <i class="bi bi-check-circle me-1"></i>OK
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-success fw-bold">
+                    <tr>
+                        <td colspan="3" class="text-end fs-6">
+                            Total Inventory Value:
+                        </td>
+                        <td class="text-center">@totalQty</td>
+                        <td></td>
+                        <td class="text-end fs-6 text-success">
+                            R @totalValue.ToString("N2")
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

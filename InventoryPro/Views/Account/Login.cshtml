@@ -1,0 +1,157 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+    <!-- No navbar on login page -->
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InventoryPro – Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 420px;
+            width: 100%;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            border-radius: 16px 16px 0 0;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .form-control:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 0.2rem rgba(26,115,232,.25);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            border: none;
+            padding: 0.75rem;
+            font-size: 1rem;
+        }
+
+            .btn-login:hover {
+                background: linear-gradient(135deg, #1557b0, #0a3a8a);
+            }
+    </style>
+</head>
+<body>
+    <div class="login-card bg-white">
+
+        <!-- Header -->
+        <div class="login-header">
+            <i class="bi bi-box-seam" style="font-size: 3rem;"></i>
+            <h3 class="mt-2 mb-0 fw-bold">InventoryPro</h3>
+            <p class="mb-0 opacity-75">Durban Small Business Supplies</p>
+        </div>
+
+        <!-- Form -->
+        <div class="login-body">
+            <h5 class="text-center text-muted mb-4">Sign in to your account</h5>
+
+            <!-- Validation summary for login errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                </div>
+            }
+
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label fw-semibold">
+                        <i class="bi bi-person me-1"></i>Username
+                    </label>
+                    <input asp-for="Username" class="form-control form-control-lg"
+                           placeholder="Enter your username" autocomplete="username" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label fw-semibold">
+                        <i class="bi bi-lock me-1"></i>Password
+                    </label>
+                    <div class="input-group">
+                        <input asp-for="Password" class="form-control form-control-lg"
+                               placeholder="Enter your password" id="passwordInput"
+                               autocomplete="current-password" />
+                        <button class="btn btn-outline-secondary" type="button"
+                                onclick="togglePassword()">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="mb-4 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+                    <label asp-for="RememberMe" class="form-check-label">Remember me for 7 days</label>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary btn-login w-100 text-white rounded-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+            </form>
+
+            <!-- Demo credentials hint -->
+            <div class="mt-4 p-3 bg-light rounded-3">
+                <p class="text-muted small mb-1"><strong>Demo Credentials:</strong></p>
+                <p class="text-muted small mb-1">
+                    <i class="bi bi-shield-check text-primary me-1"></i>
+                    Manager: <code>lefa_m</code> / <code>Manager@123</code>
+                </p>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-person text-secondary me-1"></i>
+                    Assistant: <code>kago_k</code> / <code>Shop123</code>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+    </script>
+</body>
+</html>

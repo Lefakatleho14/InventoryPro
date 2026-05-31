@@ -1,0 +1,100 @@
+﻿@model InventoryPro.Models.Product
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+                <li class="breadcrumb-item active">Edit Product</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-pencil me-2"></i>Edit Product —
+                    <span class="badge bg-dark ms-1">ID: @Model.ProductID</span>
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ProductID" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-8">
+                            <label asp-for="ProductName" class="form-label fw-semibold"></label>
+                            <input asp-for="ProductName" class="form-control" />
+                            <span asp-validation-for="ProductName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="UnitPrice" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="UnitPrice" class="form-control" step="0.01" />
+                            </div>
+                            <span asp-validation-for="UnitPrice" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="QuantityInStock" class="form-label fw-semibold"></label>
+                            <input asp-for="QuantityInStock" class="form-control" min="0" />
+                            <span asp-validation-for="QuantityInStock" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="ReorderLevel" class="form-label fw-semibold"></label>
+                            <input asp-for="ReorderLevel" class="form-control" min="0" />
+                            <div class="form-text">Alert when stock falls to this level</div>
+                            <span asp-validation-for="ReorderLevel" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Supplier" class="form-label fw-semibold"></label>
+                            <input asp-for="Supplier" class="form-control" />
+                            <span asp-validation-for="Supplier" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="LastUpdated" class="form-label fw-semibold"></label>
+                            <input asp-for="LastUpdated" class="form-control" readonly />
+                            <div class="form-text">Auto-updated on save</div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-warning text-dark">
+                            <i class="bi bi-check-circle me-2"></i>Update Product
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.ProductID"
+                           class="btn btn-outline-info">
+                            <i class="bi bi-eye me-2"></i>View Details
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Products
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

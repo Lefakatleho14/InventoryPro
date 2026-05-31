@@ -1,0 +1,169 @@
+﻿@model IEnumerable<InventoryPro.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+    int lowStockCount = ViewBag.LowStockCount ?? 0;
+    int totalProducts = ViewBag.TotalProducts ?? 0;
+}
+
+<!-- ── Page Header ── -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-archive me-2 text-primary"></i>Products
+        </h2>
+        <p class="text-muted mb-0">
+            @totalProducts total products &nbsp;|&nbsp;
+            <span class="text-danger">@lowStockCount low stock</span>
+        </p>
+    </div>
+    @if (User.IsInRole("Manager"))
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Add New Product
+        </a>
+    }
+</div>
+
+<!-- ── Search & Filter Bar ── -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-search me-1"></i>Search Products
+                </label>
+                <input type="text" name="searchString" class="form-control"
+                       placeholder="Search by name, supplier or product ID..."
+                       value="@ViewBag.SearchString" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Stock Status</label>
+                <select name="stockFilter" class="form-select">
+                    <option value="" selected="@(ViewBag.StockFilter == null)">All Products</option>
+                    <option value="low" selected="@(ViewBag.StockFilter == "low")">Low Stock Only</option>
+                    <option value="ok" selected="@(ViewBag.StockFilter == "ok")">Healthy Stock Only</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search me-1"></i>Search
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary flex-fill">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Products Table ── -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center p-5 text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-3 fs-5">No products found.</p>
+                @if (User.IsInRole("Manager"))
+                {
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add First Product
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>Supplier</th>
+                            <th class="text-center">Qty In Stock</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Stock Value</th>
+                            <th class="text-center">Reorder At</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model)
+                        {
+                            <tr class="@(product.IsLowStock ? "table-danger" : "")">
+                                <td>
+                                    <span class="badge bg-secondary">@product.ProductID</span>
+                                </td>
+                                <td>
+                                    <strong>@product.ProductName</strong>
+                                    @if (!string.IsNullOrEmpty(product.Description))
+                                    {
+                                        <br />
+                                        <small class="text-muted">@product.Description</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@(product.Supplier ?? "—")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold @(product.IsLowStock ? "text-danger" : "text-success")">
+                                        @product.QuantityInStock
+                                    </span>
+                                </td>
+                                <td class="text-end">R @product.UnitPrice.ToString("N2")</td>
+                                <td class="text-end fw-semibold">
+                                    R @product.StockValue.ToString("N2")
+                                </td>
+                                <td class="text-center text-muted">@product.ReorderLevel</td>
+                                <td class="text-center">
+                                    @if (product.IsLowStock)
+                                    {
+                                        <span class="badge bg-danger rounded-pill">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Low Stock
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success rounded-pill">
+                                            <i class="bi bi-check-circle me-1"></i>OK
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@product.ProductID"
+                                           class="btn btn-outline-info" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (User.IsInRole("Manager"))
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@product.ProductID"
+                                               class="btn btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@product.ProductID"
+                                               class="btn btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="5" class="fw-bold text-end">Total Inventory Value:</td>
+                            <td class="fw-bold text-end text-success">
+                                R @Model.Sum(p => p.StockValue).ToString("N2")
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+    </div>
+</div>

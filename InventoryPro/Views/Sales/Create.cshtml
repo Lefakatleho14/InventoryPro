@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "Record Sale";
+    var products = ViewBag.Products as List<InventoryPro.Models.Product>
+                   ?? new List<InventoryPro.Models.Product>();
+    var selected = ViewBag.SelectedProduct as InventoryPro.Models.Product;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index">Sales History</a>
+                </li>
+                <li class="breadcrumb-item active">Record Sale</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-cart-plus me-2"></i>Record New Sale
+                </h5>
+            </div>
+            <div class="card-body p-4">
+
+                <!-- Validation errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                    </div>
+                }
+
+                <form asp-action="Create" method="post" id="saleForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Product Selection -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-box me-1"></i>Select Product
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select name="productId" id="productSelect"
+                                class="form-select form-select-lg"
+                                onchange="loadProductDetails(this.value)">
+                            <option value="">— Choose a product —</option>
+                            @foreach (var product in products)
+                            {
+                                bool isSelected = selected != null &&
+                                selected.ProductID == product.ProductID;
+                                <option value="@product.ProductID"
+                                        selected="@isSelected">
+                                    [@product.ProductID] @product.ProductName
+                                    — R @product.UnitPrice.ToString("N2")
+                                    (Stock: @product.QuantityInStock)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Product Info Card (shown after selection) -->
+                    <div id="productInfo" class="card bg-light mb-3"
+                         style="display:none;">
+                        <div class="card-body py-2">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="fw-bold text-primary" id="infoPrice">—</div>
+                                    <small class="text-muted">Unit Price</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-success" id="infoStock">—</div>
+                                    <small class="text-muted">In Stock</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-warning" id="infoTotal">—</div>
+                                    <small class="text-muted">Sale Total</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-123 me-1"></i>Quantity to Sell
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" name="quantitySold" id="quantityInput"
+                               class="form-control form-control-lg"
+                               placeholder="Enter quantity" min="1" value="1"
+                               oninput="updateTotal()" />
+                        <div class="form-text" id="stockHint"></div>
+                    </div>
+
+                    <!-- Total Price Display -->
+                    <div class="mb-4 p-3 bg-success bg-opacity-10
+                                border border-success rounded-3 text-center">
+                        <div class="text-muted small">TOTAL SALE PRICE</div>
+                        <div class="display-6 fw-bold text-success" id="totalDisplay">
+                            R 0.00
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg"
+                                id="submitBtn">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Confirm Sale
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Store product data loaded via AJAX
+        let currentProduct = null;
+
+        // Auto-load if product was pre-selected
+        window.addEventListener('load', function () {
+            const sel = document.getElementById('productSelect');
+            if (sel.value) loadProductDetails(sel.value);
+        });
+
+        // Load product details via AJAX when dropdown changes
+        function loadProductDetails(productId) {
+            if (!productId) {
+                document.getElementById('productInfo').style.display = 'none';
+                document.getElementById('totalDisplay').textContent = 'R 0.00';
+                currentProduct = null;
+                return;
+            }
+
+            fetch(`/Sales/GetProductDetails/${productId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) return;
+                    currentProduct = data;
+
+                    // Show product info card
+                    document.getElementById('productInfo').style.display = 'block';
+                    document.getElementById('infoPrice').textContent =
+                        'R ' + parseFloat(data.unitPrice).toFixed(2);
+                    document.getElementById('infoStock').textContent =
+                        data.quantityInStock;
+                    document.getElementById('stockHint').textContent =
+                        `Maximum: ${data.quantityInStock} unit(s) available`;
+
+                    // Set max on quantity input
+                    document.getElementById('quantityInput').max =
+                        data.quantityInStock;
+
+                    updateTotal();
+                });
+        }
+
+        // Recalculate total when quantity changes
+        function updateTotal() {
+            if (!currentProduct) return;
+
+            const qty = parseInt(document.getElementById('quantityInput').value) || 0;
+            const price = parseFloat(currentProduct.unitPrice) || 0;
+            const total = qty * price;
+
+            document.getElementById('infoTotal').textContent =
+                'R ' + total.toFixed(2);
+            document.getElementById('totalDisplay').textContent =
+                'R ' + total.toFixed(2);
+
+            // Warn if over stock
+            const btn = document.getElementById('submitBtn');
+            if (qty > currentProduct.quantityInStock) {
+                document.getElementById('totalDisplay').classList.add('text-danger');
+                document.getElementById('totalDisplay').classList.remove('text-success');
+                btn.disabled = true;
+                btn.textContent = 'Insufficient Stock';
+            } else {
+                document.getElementById('totalDisplay').classList.remove('text-danger');
+                document.getElementById('totalDisplay').classList.add('text-success');
+                btn.disabled = false;
+                btn.innerHTML =
+                    '<i class="bi bi-check-circle me-2"></i>Confirm Sale';
+            }
+        }
+    </script>
+}

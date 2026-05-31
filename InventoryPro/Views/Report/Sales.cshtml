@@ -1,0 +1,163 @@
+﻿@model InventoryPro.ViewModels.SalesReportViewModel
+@{
+    ViewData["Title"] = "Sales Report";
+}
+
+<!-- ── Header ── -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-graph-up me-2 text-primary"></i>Sales Report
+        </h2>
+        <p class="text-muted mb-0">Filter by date range and export</p>
+    </div>
+</div>
+
+<!-- ── Filter Form ── -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filter Options</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Sales" method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">From Date</label>
+                <input type="date" name="startDate" class="form-control"
+                       value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">To Date</label>
+                <input type="date" name="endDate" class="form-control"
+                       value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search me-1"></i>Generate
+                </button>
+                <a asp-action="Sales" class="btn btn-outline-secondary flex-fill">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Summary Cards ── -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#28a745,#1e7e34);">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">R @Model.TotalRevenue.ToString("N2")</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1a73e8,#0d47a1);">
+            <div class="stat-icon"><i class="bi bi-receipt"></i></div>
+            <div class="stat-label">Total Transactions</div>
+            <div class="stat-value">@Model.TotalTransactions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background:linear-gradient(135deg,#fd7e14,#e55a00);">
+            <div class="stat-icon"><i class="bi bi-box"></i></div>
+            <div class="stat-label">Total Items Sold</div>
+            <div class="stat-value">@Model.TotalItemsSold</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Export Buttons ── -->
+@if (Model.Sales.Any())
+{
+    <div class="d-flex gap-2 mb-3">
+        <a asp-action="ExportSalesPdf"
+           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+           class="btn btn-danger">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF
+        </a>
+        <a asp-action="ExportSalesCsv"
+           asp-route-startDate="@Model.StartDate?.ToString("yyyy-MM-dd")"
+           asp-route-endDate="@Model.EndDate?.ToString("yyyy-MM-dd")"
+           class="btn btn-success">
+            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export CSV
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="bi bi-printer me-2"></i>Print
+        </button>
+    </div>
+}
+
+<!-- ── Sales Table ── -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between">
+        <span class="fw-semibold">
+            <i class="bi bi-table me-2"></i>Sales Data
+        </span>
+        <span class="badge bg-primary">@Model.Sales.Count record(s)</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Sales.Any())
+        {
+            <div class="text-center p-5 text-muted">
+                <i class="bi bi-search fs-1"></i>
+                <p class="mt-3">No sales found for the selected period.</p>
+                <p class="small">Try adjusting your date range or clear filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Sale ID</th>
+                            <th>Date & Time</th>
+                            <th>Product</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Total</th>
+                            <th>Served By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sale in Model.Sales)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">#@sale.SaleID</span>
+                                </td>
+                                <td>
+                                    @sale.SaleDate.ToString("dd MMM yyyy")
+                                    <br />
+                                    <small class="text-muted">
+                                        @sale.SaleDate.ToString("HH:mm")
+                                    </small>
+                                </td>
+                                <td><strong>@sale.Product?.ProductName</strong></td>
+                                <td class="text-center">@sale.QuantitySold</td>
+                                <td class="text-end text-muted">
+                                    R @sale.Product?.UnitPrice.ToString("N2")
+                                </td>
+                                <td class="text-end fw-bold text-success">
+                                    R @sale.TotalPrice.ToString("N2")
+                                </td>
+                                <td><small>@sale.User?.FullName</small></td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="5" class="text-end">Grand Total:</td>
+                            <td class="text-end text-success">
+                                R @Model.TotalRevenue.ToString("N2")
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+    </div>
+</div>

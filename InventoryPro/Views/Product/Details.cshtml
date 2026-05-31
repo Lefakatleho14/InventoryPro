@@ -1,0 +1,164 @@
+﻿@model InventoryPro.Models.Product
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+                <li class="breadcrumb-item active">@Model.ProductName</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center
+                        @(Model.IsLowStock ? "bg-danger text-white" : "bg-info text-white")">
+                <h5 class="mb-0">
+                    <i class="bi bi-box me-2"></i>@Model.ProductName
+                </h5>
+                <span class="badge bg-white
+                      @(Model.IsLowStock ? "text-danger" : "text-info")">
+                    ID: @Model.ProductID
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-semibold text-muted">Product Name</td>
+                                <td>@Model.ProductName</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Description</td>
+                                <td>@(Model.Description ?? "—")</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Supplier</td>
+                                <td>@(Model.Supplier ?? "—")</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-muted">Last Updated</td>
+                                <td>@Model.LastUpdated.ToString("dd MMM yyyy HH:mm")</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="card bg-light text-center p-3">
+                                    <div class="fs-2 fw-bold
+                                        @(Model.IsLowStock ? "text-danger" : "text-success")">
+                                        @Model.QuantityInStock
+                                    </div>
+                                    <small class="text-muted">Qty In Stock</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light text-center p-3">
+                                    <div class="fs-2 fw-bold text-primary">
+                                        R @Model.UnitPrice.ToString("N2")
+                                    </div>
+                                    <small class="text-muted">Unit Price</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light text-center p-3">
+                                    <div class="fs-2 fw-bold text-warning">
+                                        @Model.ReorderLevel
+                                    </div>
+                                    <small class="text-muted">Reorder Level</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card bg-light text-center p-3">
+                                    <div class="fs-2 fw-bold text-success">
+                                        R @Model.StockValue.ToString("N2")
+                                    </div>
+                                    <small class="text-muted">Stock Value</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                @if (Model.IsLowStock)
+                {
+                    <div class="alert alert-danger mt-3 mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Low Stock!</strong> This product is at or below its reorder level.
+                        Recommended order quantity:
+                        <strong>@((Model.ReorderLevel * 3) - Model.QuantityInStock) units</strong>
+                    </div>
+                }
+            </div>
+
+            <div class="card-footer d-flex gap-2">
+                @if (User.IsInRole("Manager"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.ProductID"
+                       class="btn btn-warning text-dark">
+                        <i class="bi bi-pencil me-2"></i>Edit Product
+                    </a>
+                }
+                <a asp-controller="Sales" asp-action="Create"
+                   class="btn btn-success">
+                    <i class="bi bi-cart-plus me-2"></i>Record Sale
+                </a>
+                <a asp-action="Index" class="btn btn-outline-secondary ms-auto">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Products
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Sales for this product -->
+        @if (Model.Sales != null && Model.Sales.Any())
+        {
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="bi bi-receipt me-2"></i>
+                        Recent Sales for this Product (@Model.Sales.Count total)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Sale ID</th>
+                                    <th>Date</th>
+                                    <th class="text-center">Qty Sold</th>
+                                    <th class="text-end">Total Price</th>
+                                    <th>Served By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sale in Model.Sales
+                                                            .OrderByDescending(s => s.SaleDate).Take(10))
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-secondary">#@sale.SaleID</span></td>
+                                        <td>@sale.SaleDate.ToString("dd MMM yyyy HH:mm")</td>
+                                        <td class="text-center">@sale.QuantitySold</td>
+                                        <td class="text-end text-success fw-semibold">
+                                            R @sale.TotalPrice.ToString("N2")
+                                        </td>
+                                        <td>@(sale.User?.FullName ?? "—")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

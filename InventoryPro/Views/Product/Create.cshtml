@@ -1,0 +1,105 @@
+﻿@model InventoryPro.Models.Product
+@{
+    ViewData["Title"] = "Add New Product";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index">Products</a>
+                </li>
+                <li class="breadcrumb-item active">Add New Product</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>Add New Product
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-3">
+
+                        <!-- Product Name -->
+                        <div class="col-md-8">
+                            <label asp-for="ProductName" class="form-label fw-semibold"></label>
+                            <input asp-for="ProductName" class="form-control"
+                                   placeholder="e.g. A4 Paper (500 sheets)" />
+                            <span asp-validation-for="ProductName" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Unit Price -->
+                        <div class="col-md-4">
+                            <label asp-for="UnitPrice" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R</span>
+                                <input asp-for="UnitPrice" class="form-control"
+                                       placeholder="0.00" step="0.01" />
+                            </div>
+                            <span asp-validation-for="UnitPrice" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="2"
+                                      placeholder="Optional product description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Qty In Stock -->
+                        <div class="col-md-4">
+                            <label asp-for="QuantityInStock" class="form-label fw-semibold"></label>
+                            <input asp-for="QuantityInStock" class="form-control"
+                                   placeholder="0" min="0" />
+                            <span asp-validation-for="QuantityInStock" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Reorder Level -->
+                        <div class="col-md-4">
+                            <label asp-for="ReorderLevel" class="form-label fw-semibold"></label>
+                            <input asp-for="ReorderLevel" class="form-control"
+                                   placeholder="5" min="0" />
+                            <div class="form-text">Alert when stock falls to this level</div>
+                            <span asp-validation-for="ReorderLevel" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Supplier -->
+                        <div class="col-md-4">
+                            <label asp-for="Supplier" class="form-label fw-semibold"></label>
+                            <input asp-for="Supplier" class="form-control"
+                                   placeholder="e.g. PaperWorld Durban" />
+                            <span asp-validation-for="Supplier" class="text-danger small"></span>
+                        </div>
+
+                    </div>
+
+                    <!-- Form Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Save Product
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Products
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

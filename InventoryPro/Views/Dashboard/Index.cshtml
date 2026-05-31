@@ -1,0 +1,385 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+
+    var lowStockProducts = ViewBag.LowStockProducts as List<InventoryPro.Models.Product> ?? new List<InventoryPro.Models.Product>();
+    var recentSales = ViewBag.RecentSales as List<InventoryPro.Models.Sale> ?? new List<InventoryPro.Models.Sale>();
+    decimal totalValuation = ViewBag.TotalValuation ?? 0m;
+    decimal todaysSalesTotal = ViewBag.TodaysSalesTotal ?? 0m;
+    int todaysTransactionCount = ViewBag.TodaysTransactionCount ?? 0;
+    int totalProducts = ViewBag.TotalProducts ?? 0;
+    int lowStockCount = ViewBag.LowStockCount ?? 0;
+}
+
+<!-- ── Page Header ── -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Dashboard
+        </h2>
+        <p class="text-muted mb-0">
+            Welcome back, <strong>@User.FindFirst("FullName")?.Value</strong> —
+            @DateTime.Now.ToString("dddd, dd MMMM yyyy")
+        </p>
+    </div>
+    <div>
+        <a asp-controller="Sales" asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-cart-plus me-2"></i>Record Sale
+        </a>
+    </div>
+</div>
+
+<!-- ── Low Stock Alert Banner ── -->
+@if (lowStockCount > 0)
+{
+    <div class="alert alert-warning alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Low Stock Alert!</strong>
+                @lowStockCount product(s) are at or below their reorder level.
+                <a asp-controller="Report" asp-action="LowStock" class="alert-link ms-2">
+                    View Low Stock Report →
+                </a>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- ── Stat Cards Row ── -->
+<div class="row g-4 mb-4">
+
+    <!-- Total Products -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100" style="background: linear-gradient(135deg,#1a73e8,#0d47a1);">
+            <div class="stat-icon"><i class="bi bi-archive"></i></div>
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">@totalProducts</div>
+            <a asp-controller="Product" asp-action="Index"
+               class="text-white-50 small text-decoration-none">
+                Manage Products →
+            </a>
+        </div>
+    </div>
+
+    <!-- Inventory Valuation -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100" style="background: linear-gradient(135deg,#28a745,#1e7e34);">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <div class="stat-label">Inventory Value</div>
+            <div class="stat-value">R @totalValuation.ToString("N2")</div>
+            <a asp-controller="Report" asp-action="Valuation"
+               class="text-white-50 small text-decoration-none">
+                View Report →
+            </a>
+        </div>
+    </div>
+
+    <!-- Today's Sales -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100" style="background: linear-gradient(135deg,#fd7e14,#e55a00);">
+            <div class="stat-icon"><i class="bi bi-graph-up"></i></div>
+            <div class="stat-label">Today's Sales</div>
+            <div class="stat-value">R @todaysSalesTotal.ToString("N2")</div>
+            <span class="text-white-50 small">
+                @todaysTransactionCount transaction(s) today
+            </span>
+        </div>
+    </div>
+
+    <!-- Low Stock Alert Count -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100"
+             style="background: linear-gradient(135deg,@(lowStockCount > 0 ? "#dc3545,#a71d2a" : "#6c757d,#495057"));">
+            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div class="stat-label">Low Stock Items</div>
+            <div class="stat-value">@lowStockCount</div>
+            <a asp-controller="Report" asp-action="LowStock"
+               class="text-white-50 small text-decoration-none">
+                View Details →
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Bottom Row: Low Stock Table + Recent Sales ── -->
+<div class="row g-4">
+
+    <!-- Low Stock Products Table -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-exclamation-triangle me-2"></i>Low Stock Products</span>
+                <span class="badge bg-white text-danger">@lowStockCount items</span>
+            </div>
+            <div class="card-body p-0">
+                @if (lowStockProducts.Count == 0)
+                {
+                    <div class="text-center p-4 text-muted">
+                        <i class="bi bi-check-circle fs-2 text-success"></i>
+                        <p class="mt-2">All stock levels are healthy!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">In Stock</th>
+                                    <th class="text-center">Reorder At</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in lowStockProducts)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold">@product.ProductName</span>
+                                            <br />
+                                            <small class="text-muted">ID: @product.ProductID</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger rounded-pill">
+                                                @product.QuantityInStock
+                                            </span>
+                                        </td>
+                                        <td class="text-center text-muted">@product.ReorderLevel</td>
+                                        <td class="text-center">
+                                            @if (User.IsInRole("Manager"))
+                                            {
+                                                <a asp-controller="Product" asp-action="Edit"
+                                                   asp-route-id="@product.ProductID"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            @if (lowStockProducts.Count > 0)
+            {
+                <div class="card-footer bg-light text-end">
+                    <a asp-controller="Report" asp-action="LowStock"
+                       class="btn btn-sm btn-danger">
+                        <i class="bi bi-file-earmark-text me-1"></i>Full Low Stock Report
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Recent Sales -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt me-2"></i>Recent Sales</span>
+                <span class="badge bg-white text-primary">Last 5</span>
+            </div>
+            <div class="card-body p-0">
+                @if (recentSales.Count == 0)
+                {
+                    <div class="text-center p-4 text-muted">
+                        <i class="bi bi-cart-x fs-2"></i>
+                        <p class="mt-2">No sales recorded yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sale in recentSales)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold">
+                                                @sale.Product?.ProductName
+                                            </span>
+                                            <br />
+                                            <small class="text-muted">
+                                                by @sale.User?.FullName
+                                            </small>
+                                        </td>
+                                        <td class="text-center">@sale.QuantitySold</td>
+                                        <td class="text-end text-success fw-semibold">
+                                            R @sale.TotalPrice.ToString("N2")
+                                        </td>
+                                        <td class="text-end">
+                                            <small class="text-muted">
+                                                @sale.SaleDate.ToString("dd MMM")
+                                                <br />
+                                                @sale.SaleDate.ToString("HH:mm")
+                                            </small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="card-footer bg-light text-end">
+                <a asp-controller="Sales" asp-action="Index" class="btn btn-sm btn-primary">
+                    <i class="bi bi-list-ul me-1"></i>View All Sales
+                </a>
+                <a asp-controller="Sales" asp-action="Create" class="btn btn-sm btn-success ms-2">
+                    <i class="bi bi-plus-circle me-1"></i>New Sale
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Quick Navigation Cards ── -->
+<div class="row g-3 mt-2">
+    <div class="col-12">
+        <h5 class="fw-bold text-muted">
+            <i class="bi bi-lightning me-2"></i>Quick Actions
+        </h5>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a asp-controller="Product" asp-action="Index" class="text-decoration-none">
+            <div class="card text-center p-3 h-100 border-primary border-2
+                        quick-action-card">
+                <i class="bi bi-archive text-primary fs-2"></i>
+                <p class="mb-0 mt-2 fw-semibold text-primary">Products</p>
+                <small class="text-muted">View & manage</small>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a asp-controller="Sales" asp-action="Create" class="text-decoration-none">
+            <div class="card text-center p-3 h-100 border-success border-2
+                        quick-action-card">
+                <i class="bi bi-cart-plus text-success fs-2"></i>
+                <p class="mb-0 mt-2 fw-semibold text-success">Record Sale</p>
+                <small class="text-muted">New transaction</small>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <a asp-controller="Sales" asp-action="Index" class="text-decoration-none">
+            <div class="card text-center p-3 h-100 border-warning border-2
+                        quick-action-card">
+                <i class="bi bi-clock-history text-warning fs-2"></i>
+                <p class="mb-0 mt-2 fw-semibold text-warning">Sales History</p>
+                <small class="text-muted">All transactions</small>
+            </div>
+        </a>
+    </div>
+
+    @if (User.IsInRole("Manager"))
+    {
+        <div class="col-6 col-md-3">
+            <a asp-controller="Report" asp-action="Sales" class="text-decoration-none">
+                <div class="card text-center p-3 h-100 border-danger border-2
+                                quick-action-card">
+                    <i class="bi bi-bar-chart text-danger fs-2"></i>
+                    <p class="mb-0 mt-2 fw-semibold text-danger">Reports</p>
+                    <small class="text-muted">Sales & stock</small>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<!-- ── Low Stock Popup Modal (auto-shows if low stock exists) ── -->
+@if (lowStockCount > 0)
+{
+    <div class="modal fade" id="lowStockModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-warning">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Low Stock Warning
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>The following <strong>@lowStockCount item(s)</strong> need restocking:</p>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var p in lowStockProducts.Take(5))
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@p.ProductName</span>
+                                <span class="badge bg-danger">@p.QuantityInStock left</span>
+                            </li>
+                        }
+                    </ul>
+                    @if (lowStockProducts.Count > 5)
+                    {
+                        <p class="text-muted small mt-2">
+                            ...and @(lowStockProducts.Count - 5) more items.
+                        </p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <a asp-controller="Report" asp-action="LowStock"
+                       class="btn btn-warning text-dark">
+                        <i class="bi bi-file-earmark-text me-1"></i>View Full Report
+                    </a>
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Auto-show low stock modal on dashboard load
+        @if (lowStockCount > 0)
+        {
+                <text>
+                window.addEventListener('load', function () {
+                    var modal = new bootstrap.Modal(document.getElementById('lowStockModal'));
+                    modal.show();
+                });
+                </text>
+        }
+
+        // Highlight active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === window.location.pathname) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+
+    <style>
+        .quick-action-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+            .quick-action-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+            }
+    </style>
+}

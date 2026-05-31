@@ -1,0 +1,89 @@
+﻿@model InventoryPro.Models.Product
+@{
+    ViewData["Title"] = "Delete Product";
+    int salesCount = ViewBag.SalesCount ?? 0;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+                <li class="breadcrumb-item active">Delete Product</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-trash me-2"></i>Delete Product
+                </h5>
+            </div>
+            <div class="card-body p-4">
+
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning!</strong> This action cannot be undone.
+                </div>
+
+                @if (salesCount > 0)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle me-2"></i>
+                        This product has <strong>@salesCount sale record(s)</strong>.
+                        It cannot be deleted to preserve sales history.
+                        Please edit the product instead.
+                    </div>
+                }
+
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="fw-semibold text-muted">Product ID</td>
+                        <td><span class="badge bg-secondary">@Model.ProductID</span></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Product Name</td>
+                        <td class="fw-bold">@Model.ProductName</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Qty In Stock</td>
+                        <td>@Model.QuantityInStock</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Unit Price</td>
+                        <td>R @Model.UnitPrice.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-semibold text-muted">Sales Records</td>
+                        <td>
+                            <span class="badge @(salesCount > 0 ? "bg-warning text-dark" : "bg-success")">
+                                @salesCount
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="d-flex gap-2 mt-3">
+                    @if (salesCount == 0)
+                    {
+                        <form asp-action="Delete" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="ProductID" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>Yes, Delete Permanently
+                            </button>
+                        </form>
+                    }
+                    <a asp-action="Edit" asp-route-id="@Model.ProductID"
+                       class="btn btn-warning text-dark">
+                        <i class="bi bi-pencil me-2"></i>Edit Instead
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
