@@ -50,18 +50,30 @@ Screenshots
 
 Login Page
 > Secure login with role-based redirection and BCrypt password verification.
+> <img width="1338" height="651" alt="inventory 1" src="https://github.com/user-attachments/assets/8c45dd47-eaed-43d1-be41-8d1b23863e91" />
+
 
 Dashboard
 > Real-time inventory valuation, today's sales totals, low stock alerts and popup notifications.
+> <img width="1352" height="643" alt="inventory 3" src="https://github.com/user-attachments/assets/21bc0957-f25f-4c76-846d-b66001d5c95d" />
+<img width="1346" height="642" alt="inventory 2" src="https://github.com/user-attachments/assets/22ad7537-9d33-4133-bed1-845430e328f3" />
+
+
 
 Product Management
 > Full CRUD with search, filter by stock status, and inline low stock indicators.
+> <img width="1347" height="640" alt="inventory 5" src="https://github.com/user-attachments/assets/589fe2ef-602e-44ed-9825-afaf85ddbd67" />
+
 
 Sales Recording
 > AJAX-powered product lookup, live total calculation, stock validation, and printable receipt generation.
+> <img width="1332" height="632" alt="inventory 6" src="https://github.com/user-attachments/assets/201ae320-e354-4a62-b57e-0eee0ae82325" />
+
 
 Reports
 > Date-filtered sales reports, inventory valuation, and low stock reports — all exportable to PDF and CSV.
+> <img width="1345" height="644" alt="inventory 7" src="https://github.com/user-attachments/assets/2c247a88-7cd7-48cc-a368-095de8360457" />
+
 
 
 Key Technical Highlights
@@ -216,7 +228,7 @@ LastUpdated
 
 Team
 
-CodeCrafters — Final Year WIL Project
+CodeCrafters - Final Year WIL Project
 > Built for Durban Small Business Supplies, Durban, South Africa.
 
 
@@ -226,4 +238,4 @@ This project was built for academic purposes as part of a Work Integrated Learni
 programme. Feel free to use it as a reference or learning resource.
 
 
-Built using ASP.NET Core MVC — CodeCrafters
+Built using ASP.NET Core MVC - CodeCrafters
