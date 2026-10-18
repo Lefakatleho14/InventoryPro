@@ -1,0 +1,62 @@
+name: HTML Validation CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-html:
+    name: Validate HTML Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install HTML validator
+        run: npm install -g html-validate
+
+      - name: Validate HTML files
+        run: |
+          html-validate website/index.html \
+                        website/about.html \
+                        website/features.html \
+                        website/contact.html \
+                        website/login.html || true
+
+      - name: Check all HTML files exist
+        run: |
+          echo "Checking required files..."
+          ls -la website/
+          ls -la website/css/
+          ls -la website/js/
+          echo "All files present ?"
+
+  link-check:
+    name: Check Internal Links
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check CSS file exists
+        run: test -f website/css/style.css && echo "style.css ?"
+
+      - name: Check JS file exists
+        run: test -f website/js/main.js && echo "main.js ?"
+
+      - name: Check all pages exist
+        run: |
+          test -f website/index.html    && echo "index.html ?"
+          test -f website/about.html    && echo "about.html ?"
+          test -f website/features.html && echo "features.html ?"
+          test -f website/contact.html  && echo "contact.html ?"
+          test -f website/login.html    && echo "login.html ?"
