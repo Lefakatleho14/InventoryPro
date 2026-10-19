@@ -226,6 +226,13 @@ LastLoginDate            Supplier
 LastUpdated
 
 
+## Live Website
+🌐 [View InventoryPro Website](https://Lefakatleho14.github.io/InventoryPro/)
+
+## Repositories
+- [Web Application](https://github.com/Lefakatleho14/InventoryPro)
+- [Android Application](https://github.com/Lefakatleho14/InventoryPro-Android)
+
 Team
 
 CodeCrafters - Final Year WIL Project
