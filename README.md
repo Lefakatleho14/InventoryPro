@@ -231,7 +231,7 @@ LastUpdated
 
 ## Repositories
 - [Web Application](https://github.com/Lefakatleho14/InventoryPro)
-- [Android Application](https://github.com/Lefakatleho14/InventoryPro-Android)
+- [Android Application](https://github.com/Lefakatleho14/InventoryPro.)
 
 Team
 
