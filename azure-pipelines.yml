@@ -1,0 +1,21 @@
+trigger:
+  - main
+
+pool:
+  name: 'Default'  # This tells Azure to use your local computer instead of the restricted Microsoft servers
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET 8 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '8.x'
+
+- script: dotnet restore
+  displayName: 'Restore Dependencies'
+
+- script: dotnet build --configuration Release --no-restore
+  displayName: 'Build Web App'
+
+- script: dotnet test --no-build --configuration Release
+  displayName: 'Run Unit Tests'
